@@ -11,7 +11,14 @@ module top (
 );
 
     wire stby_flag;
-    reg [21:0] cnt;
+    reg [23:0] cnt;
+    reg [9:0] rd_addr;         // Read address for histogram
+    reg [10:0] histo_count;    // Counter for 1024 histogram readout cycles
+    reg rd_en;                 // Histogram read enable
+    reg histo_clear;           // Histogram clear signal
+    reg histo_valid_reg;       // Register for histogram valid signal
+    reg histo_clock_reg;       // Register for histogram clock
+    reg histo_reading;         // Indicates if histogram is being read
 
     // Internal Oscillator
     defparam OSCH_inst.NOM_FREQ = "133.00";	// 133 MHz clock
@@ -37,15 +44,6 @@ module top (
         else	
             cnt <= cnt + 1;
 
-    assign led0 = stdby_in ? 1'b1 : cnt[20];
-    assign led1 = stdby_in ? 1'b1 : ~cnt[20];
-    assign led2 = stdby_in ? 1'b1 : cnt[20];
-    assign led3 = stdby_in ? 1'b1 : ~cnt[20];
-    assign led4 = stdby_in ? 1'b1 : cnt[20];
-    assign led5 = stdby_in ? 1'b1 : ~cnt[20];
-    assign led6 = stdby_in ? 1'b1 : cnt[20];
-    assign led7 = stdby_in ? 1'b1 : ~cnt[20];
-
     // Grayscale Color Bar Generator
     wire [9:0] pixel_out;  // 10-bit pixel output
     grayscale_color_bar grayscale_gen (
@@ -56,4 +54,66 @@ module top (
         .frame_valid(frame_valid) // Frame valid output signal
     );
 
+    // Grayscale Histogram Generator
+    wire [15:0] rd_data;   // Data from histogram (number of occurrences)
+
+    grayscale_histogram histogram_gen (
+        .clk(osc_clk),               // Clock input
+        .reset_n(~stdby_in),         // Active low reset
+        .frame_valid(frame_valid),   // Frame valid signal
+        .line_valid(line_valid),     // Line valid signal
+        .pixel_out(pixel_out),       // 10-bit pixel output from grayscale generator
+        .rd_en(rd_en),               // Read enable during blanking period
+        .rd_addr(rd_addr),           // Read address for histogram bins
+        .rd_data(rd_data),           // Read data from histogram bins
+        .clear(histo_clear)          // Clear histogram after readout
+    );
+
+
+    // Histogram readout logic
+    always @(posedge osc_clk or posedge stdby_in) begin
+        if (stdby_in) begin
+            rd_addr <= 10'b0;
+            histo_count <= 11'b0;
+            histo_valid_reg <= 1'b0;
+            histo_clock_reg <= 1'b0;
+            histo_reading <= 1'b0;
+            rd_en <= 1'b0;
+            histo_clear <= 1'b0;
+        end else begin
+            if (!frame_valid && !histo_reading) begin
+                // Start reading when frame is invalid (blanking period)
+                histo_reading <= 1'b1;
+                histo_valid_reg <= 1'b1;
+                histo_count <= 11'b0;
+                rd_addr <= 10'b0;
+                rd_en <= 1'b1;
+                histo_clear <= 1'b0;  // Ensure clear is low during readout
+            end else if (histo_reading && histo_count < 11'd1024) begin
+                // Continue reading the histogram
+                histo_count <= histo_count + 1;
+                rd_addr <= rd_addr + 1;
+                histo_clock_reg <= ~histo_clock_reg;  // Toggle histo_clock
+            end else if (histo_count >= 11'd1024) begin
+                // End reading after 1024 bins
+                histo_reading <= 1'b0;
+                histo_valid_reg <= 1'b0;
+                rd_en <= 1'b0;
+                histo_clear <= 1'b1;  // Set clear after reading all bins
+            end
+        end
+    end
+
+    // Assign outputs
+    assign led0 = stdby_in ? 1'b1 :  cnt[22];
+    assign led1 = stdby_in ? 1'b1 : ~cnt[22];
+    assign led2 = stdby_in ? 1'b1 :  cnt[22];
+    assign led3 = stdby_in ? 1'b1 : ~cnt[22];
+    assign led4 = stdby_in ? 1'b1 :  cnt[22];
+    assign led5 = stdby_in ? 1'b1 : ~cnt[22];
+    assign led6 = stdby_in ? 1'b1 :  cnt[22];
+    assign led7 = stdby_in ? 1'b1 : ~cnt[22];
+
+	assign histo_valid = histo_valid_reg;  // Histogram valid signal
+    assign histo_clock = histo_clock_reg;  // Histogram clock signal
 endmodule

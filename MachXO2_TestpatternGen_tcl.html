@@ -30,6 +30,48 @@ prj_project close
 
 
 
+<A name="pn241016114949"></A><B><U><big>pn241016114949</big></U></B>
+#Start recording tcl command: 10/16/2024 11:31:15
+#Project Location: D:/fpga-projects/lattice/MachXO2_TestpatternGen; Project name: MachXO2_TestpatternGen
+prj_project open "D:/fpga-projects/lattice/MachXO2_TestpatternGen/MachXO2_TestpatternGen.ldf"
+prj_run Map -impl impl1
+prj_run Map -impl impl1
+prj_run Export -impl impl1
+prj_project save
+prj_project close
+#Stop recording: 10/16/2024 11:49:49
+
+
+
+<A name="pn241016121245"></A><B><U><big>pn241016121245</big></U></B>
+#Start recording tcl command: 10/16/2024 11:50:16
+#Project Location: D:/fpga-projects/lattice/MachXO2_TestpatternGen; Project name: MachXO2_TestpatternGen
+prj_project open "D:/fpga-projects/lattice/MachXO2_TestpatternGen/MachXO2_TestpatternGen.ldf"
+prj_run Map -impl impl1
+prj_run Map -impl impl1
+prj_run Map -impl impl1
+prj_run Export -impl impl1
+pgr_project save "D:/fpga-projects/lattice/MachXO2_TestpatternGen/impl1/impl1.xcf"
+prj_src add -exclude "D:/fpga-projects/lattice/MachXO2_TestpatternGen/impl1/impl1.xcf"
+prj_src enable "D:/fpga-projects/lattice/MachXO2_TestpatternGen/impl1/impl1.xcf"
+prj_run Export -impl impl1
+pgr_program run
+prj_run Export -impl impl1
+prj_run Export -impl impl1
+prj_run PAR -impl impl1
+prj_run Map -impl impl1
+prj_run Synthesis -impl impl1 -task Lattice_Synthesis
+prj_run Synthesis -impl impl1 -task Lattice_Synthesis
+prj_run Export -impl impl1
+prj_run Export -impl impl1 -task Jedecgen
+prj_run Export -impl impl1
+pgr_project save "D:/fpga-projects/lattice/MachXO2_TestpatternGen/impl1/impl1.xcf"
+prj_run Export -impl impl1
+prj_project close
+#Stop recording: 10/16/2024 12:12:45
+
+
+
 <BR>
 <BR>
 <BR>
