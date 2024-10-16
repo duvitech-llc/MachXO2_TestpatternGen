@@ -4,7 +4,10 @@ module top (
     output osc_clk,       // Oscillator clock output
     output led0, led1, led2, led3, led4, led5, led6, led7, // LED outputs
     output frame_valid,   // Frame valid signal for scope
-    output line_valid     // Line valid signal for scope
+    output line_valid,        // Line valid signal for scope
+    output [9:0] histo_data,  // 10-bit histogram data output
+    output histo_valid,       // Histogram data valid signal
+    output histo_clock        // Histogram clock signal
 );
 
     wire stby_flag;
